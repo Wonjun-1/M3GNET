@@ -1,0 +1,26 @@
+import warnings
+
+import numpy as np
+from pymatgen.ext.matproj import MPRester
+from pymatgen.io.vasp import Poscar
+
+from m3gnet.models import Relaxer
+
+for category in (UserWarning, DeprecationWarning):
+    warnings.filterwarnings("ignore", category=category, module="tensorflow")
+
+# Specify the path to your VASP POSCAR file
+poscar_file = './LPSCl.vasp'
+
+# Read the structure from the POSCAR file
+structure = Poscar.from_file(poscar_file).structure
+
+relaxer = Relaxer()  # This loads the default pre-trained model
+relax_results = relaxer.relax(structure, verbose=True)
+
+final_structure = relax_results['final_structure']
+
+print(f"Relaxed lattice parameters are {[round(x, 3) for x in final_structure.lattice.abc]} Å")
+
+# Output the relaxed structure as a CONTCAR file
+Poscar(final_structure).write_file('./optimize_LPSCl.vasp')
